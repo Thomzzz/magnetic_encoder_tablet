@@ -5,6 +5,7 @@
 #include "hardware/i2c.h"
 
 static const uint8_t I2cAddr = 0x36;
+static const uint32_t I2cFreqHz = 400000;
 
 static i2c_inst_t *I2c0Inst = i2c0;
 static const uint8_t I2c0SclPin = 5;
@@ -14,12 +15,29 @@ static i2c_inst_t *I2c1Inst = i2c1;
 static const uint8_t I2c1SclPin = 7;
 static const uint8_t I2c1SdaPin = 6;
 
-static uint8_t as5600_get_status()
+static void as5600_init()
+{
+    i2c_init(I2c0Inst, I2cFreqHz);
+    gpio_set_function(I2c0SdaPin, GPIO_FUNC_I2C);
+    gpio_set_function(I2c0SclPin, GPIO_FUNC_I2C);
+    gpio_pull_up(I2c0SdaPin);
+    gpio_pull_up(I2c0SclPin);
+
+    i2c_init(I2c1Inst, I2cFreqHz);
+    gpio_set_function(I2c1SdaPin, GPIO_FUNC_I2C);
+    gpio_set_function(I2c1SclPin, GPIO_FUNC_I2C);
+    gpio_pull_up(I2c1SdaPin);
+    gpio_pull_up(I2c1SclPin);
+
+    // TODO: Configure settings
+}
+
+static uint8_t as5600_get_status(i2c_inst_t *I2cInst)
 {
     uint8_t buffer;
     uint8_t reg = 0x0B;
-    i2c_write_blocking(I2c0Inst, I2cAddr, &reg, 1, true);
-    i2c_read_blocking(I2c0Inst, I2cAddr, &buffer, 1, false);
+    i2c_write_blocking(I2cInst, I2cAddr, &reg, 1, true);
+    i2c_read_blocking(I2cInst, I2cAddr, &buffer, 1, false);
     return buffer;
 }
 
@@ -44,23 +62,14 @@ static uint16_t as5600_read()
 int main()
 {
     stdio_init_all();
-
-    // This example will use I2C0 on the default SDA and SCL pins (4, 5 on a Pico)
-    i2c_init(I2c0Inst, 400 * 1000);
-    gpio_set_function(I2c0SdaPin, GPIO_FUNC_I2C);
-    gpio_set_function(I2c0SclPin, GPIO_FUNC_I2C);
-    gpio_pull_up(I2c0SdaPin);
-    gpio_pull_up(I2c0SclPin);
-
-    // Make the I2C pins available to picotool
-    //bi_decl(bi_2pins_with_func(PICO_DEFAULT_I2C_SDA_PIN, PICO_DEFAULT_I2C_SCL_PIN, GPIO_FUNC_I2C));
+    as5600_init();
 
     uint8_t status = 0;
     uint16_t angle = 0;
 
     while (1) 
     {
-        status = as5600_get_status();
+        status = as5600_get_status(I2c0Inst);
         if (status & (1 << 4)) printf("Status: Magnet too weak\n");
         if (status & (1 << 3)) printf("Status: Magnet too strong\n");
         if (status & (1 << 5)) printf("Status: Magnet detected\n");
