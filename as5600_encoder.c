@@ -27,13 +27,13 @@ void as5600_init()
     // TODO: Configure settings
 }
 
-uint8_t as5600_get_status(i2c_inst_t *I2cInst)
+SStatus as5600_get_status(i2c_inst_t *I2cInst)
 {
     uint8_t buffer;
     uint8_t reg = 0x0B;
     i2c_write_blocking(I2cInst, I2cAddr, &reg, 1, true);
     i2c_read_blocking(I2cInst, I2cAddr, &buffer, 1, false);
-    return buffer;
+    return (SStatus)buffer;
 }
 
 uint16_t as5600_read_raw(i2c_inst_t *I2cInst)
