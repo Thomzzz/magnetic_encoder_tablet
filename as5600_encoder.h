@@ -22,9 +22,10 @@ typedef union Status
 
 } SStatus;
 
-_Static_assert (sizeof(SStatus) == 1); // Make sure status uses only 1 byte
+_Static_assert(sizeof(SStatus) == 1); // Make sure status uses only 1 byte
 
 void as5600_init();
+void as5600_print_configuration(i2c_inst_t *i2cInst);
 SStatus as5600_get_status(i2c_inst_t *i2cInst);
 uint16_t as5600_read_raw(i2c_inst_t *i2cInst);
 uint16_t as5600_read(i2c_inst_t *i2cInst);
