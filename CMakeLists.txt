@@ -16,6 +16,7 @@ pico_sdk_init()
 
 add_executable(magnetic_encoder_tablet
         magnetic_encoder_tablet.c
+        as5600_encoder.c
         )
 
 #target_sources(magnetic_encoder_tablet PRIVATE magnetic_encoder_tablet.c)
